@@ -4,6 +4,7 @@ use std::fs::File;
 
 use COST::graph_iterator::{EdgeMapper, DeltaCompressedReaderMapper, NodesEdgesMemMapper, UpperLowerMemMapper };
 use std::io::BufReader;
+use COST::median::median;
 
 fn main() {
 
@@ -31,27 +32,36 @@ fn main() {
 }
 
 fn label_propagation<G: EdgeMapper>(graph: &G, nodes: u32) {
-	let timer = std::time::Instant::now();
-    let mut label: Vec<u32> = (0..nodes).collect();
-    let mut old_sum: u64 = label.iter().fold(0, |t,x| t + *x as u64) + 1;
-    let mut new_sum: u64 = label.iter().fold(0, |t,x| t + *x as u64);
+	let mut timer = std::time::Instant::now();
+	let mut measurements: [std::time::Duration; 5] = [timer.elapsed(); 5];
+	for _iteration in 0 .. 5 {
+		let mut label: Vec<u32> = (0..nodes).collect();
+		let mut old_sum: u64 = label.iter().fold(0, |t,x| t + *x as u64) + 1;
+		let mut new_sum: u64 = label.iter().fold(0, |t,x| t + *x as u64);
 
-    while new_sum < old_sum {
-        graph.map_edges(|src, dst| {
-            match label[src as usize].cmp(&label[dst as usize]) {
-                std::cmp::Ordering::Less    => label[dst as usize] = label[src as usize],
-                std::cmp::Ordering::Greater => label[src as usize] = label[dst as usize],
-                std::cmp::Ordering::Equal   => { },
-            }
-        });
+		while new_sum < old_sum {
+			graph.map_edges(|src, dst| {
+				match label[src as usize].cmp(&label[dst as usize]) {
+					std::cmp::Ordering::Less    => label[dst as usize] = label[src as usize],
+					std::cmp::Ordering::Greater => label[src as usize] = label[dst as usize],
+					std::cmp::Ordering::Equal   => { },
+				}
+			});
 
-        old_sum = new_sum;
-        new_sum = label.iter().fold(0, |t,x| t + *x as u64);
-        println!("iteration");
-    }
+			old_sum = new_sum;
+			new_sum = label.iter().fold(0, |t,x| t + *x as u64);
+		}
+		
 
-    let mut non_roots = 0u32;
-    for i in 0..label.len() { if i as u32 != label[i] { non_roots += 1; }}
-	println!("Time elapsed {:?}", timer.elapsed());
-    println!("{} non-roots found", non_roots);
+		let mut non_roots = 0u32;
+		for i in 0..label.len() { if i as u32 != label[i] { non_roots += 1; }}
+		println!("{} non-roots found", non_roots);
+		measurements[_iteration] = timer.elapsed();
+		println!("Iteration {}:\t{:?}", _iteration, timer.elapsed());
+		timer = std::time::Instant::now();
+	
+	}
+	println!("Median {:?}", median(&mut measurements));
+	
+   
 }
