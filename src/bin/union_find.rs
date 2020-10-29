@@ -31,7 +31,7 @@ fn main() {
 }
 
 fn union_find<G: EdgeMapper>(graph: &G, nodes: u32) {
-
+	let timer = std::time::Instant::now();
     let mut roots: Vec<u32> = (0..nodes).collect();      // u32 works, and is smaller than uint/u64
     let mut ranks: Vec<u8> = vec![0u8; nodes as usize];  // u8 should be large enough (n < 2^256)
 
@@ -65,5 +65,6 @@ fn union_find<G: EdgeMapper>(graph: &G, nodes: u32) {
 
     let mut non_roots = 0u32;
     for i in 0..roots.len() { if i as u32 != roots[i] { non_roots += 1; }}
+	println!("Time elapsed {:?}", timer.elapsed());
     println!("{} non-roots found", non_roots);
 }

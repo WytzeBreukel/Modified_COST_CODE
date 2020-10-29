@@ -29,7 +29,40 @@ fn main() {
         _ => { println!("unrecognized mode: {:?}", mode); },
     }
 }
+fn pagerank_modified<G: EdgeMapper>(graph: &G, nodes: u32, alpha: f32) {
 
+    let mut timer = std::time::Instant::now();
+
+    let mut src = vec![0f32; nodes as usize];
+    let mut dst = vec![0f32; nodes as usize];
+    let mut deg = vec![0f32; nodes as usize];
+	
+	let mut measurements: [std::time::Duration; 20] = [timer.elapsed(); 20];
+    graph.map_edges(|x, _| { deg[x as usize] += 1f32 });
+
+    for _iteration in 0 .. 20 {
+      
+        for node in 0 .. nodes {
+            src[node as usize] = alpha * dst[node as usize] / deg[node as usize];
+            dst[node as usize] = 1f32 - alpha;
+        }
+
+        // graph.map_edges(|x, y| { dst[y as usize] += src[x as usize]; });
+
+        // UNSAFE:
+        graph.map_edges(|x, y| { unsafe { *dst.get_unchecked_mut(y as usize) += *src.get_unchecked(x as usize); }});
+		measurements[_iteration] = timer.elapsed();
+		println!("Iteration {}:\t{:?}", _iteration, timer.elapsed());
+		timer = std::time::Instant::now();
+    }
+	println!("Median {:?}", median(&mut measurements));
+}
+
+fn median(numbers: &mut [std::time::Duration]) -> std::time::Duration {
+    numbers.sort();
+    let mid = numbers.len() / 2;
+    numbers[mid]
+}
 fn pagerank<G: EdgeMapper>(graph: &G, nodes: u32, alpha: f32) {
 
     let timer = std::time::Instant::now();

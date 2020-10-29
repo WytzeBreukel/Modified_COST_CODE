@@ -31,7 +31,7 @@ fn main() {
 }
 
 fn label_propagation<G: EdgeMapper>(graph: &G, nodes: u32) {
-
+	let timer = std::time::Instant::now();
     let mut label: Vec<u32> = (0..nodes).collect();
     let mut old_sum: u64 = label.iter().fold(0, |t,x| t + *x as u64) + 1;
     let mut new_sum: u64 = label.iter().fold(0, |t,x| t + *x as u64);
@@ -52,5 +52,6 @@ fn label_propagation<G: EdgeMapper>(graph: &G, nodes: u32) {
 
     let mut non_roots = 0u32;
     for i in 0..label.len() { if i as u32 != label[i] { non_roots += 1; }}
+	println!("Time elapsed {:?}", timer.elapsed());
     println!("{} non-roots found", non_roots);
 }

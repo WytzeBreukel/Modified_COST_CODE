@@ -13,7 +13,7 @@ fn main() {
         println!("NOTE: <prefix>.upper and <prefix>.lower will be overwritten.");
         return;
     }
-
+	let mut timer = std::time::Instant::now();
     let prefix = std::env::args().nth(1).expect("name unavailable");
     let dense = std::env::args().nth(2) == Some("--dense".to_string());
 
@@ -30,4 +30,5 @@ fn main() {
             l_writer.write_u16::<LittleEndian>(ly).unwrap();
         }
     });
+	println!("Time elapsed: \t{:?}", timer.elapsed());
 }

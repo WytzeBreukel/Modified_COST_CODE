@@ -7,3 +7,4 @@ extern crate byteorder;
 pub mod typedrw;
 pub mod hilbert_curve;
 pub mod graph_iterator;
+pub mod median;
