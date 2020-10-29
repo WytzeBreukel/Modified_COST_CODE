@@ -4,6 +4,7 @@ use std::fs::File;
 
 use COST::graph_iterator::{EdgeMapper, DeltaCompressedReaderMapper, NodesEdgesMemMapper, UpperLowerMemMapper };
 use std::io::BufReader;
+use COST::median::median;
 
 fn main() {
 
@@ -18,13 +19,13 @@ fn main() {
 
     match mode.as_str() {
         "vertex" => {
-            pagerank(&NodesEdgesMemMapper::new(&name), nodes, 0.85f32)
+            pagerank_modified(&NodesEdgesMemMapper::new(&name), nodes, 0.85f32)
         },
         "hilbert" => {
-            pagerank(&UpperLowerMemMapper::new(&name), nodes, 0.85f32)
+            pagerank_modified(&UpperLowerMemMapper::new(&name), nodes, 0.85f32)
         },
         "compressed" => {
-            pagerank(&DeltaCompressedReaderMapper::new(|| BufReader::new(File::open(&name).unwrap())), nodes, 0.85f32)
+            pagerank_modified(&DeltaCompressedReaderMapper::new(|| BufReader::new(File::open(&name).unwrap())), nodes, 0.85f32)
         },
         _ => { println!("unrecognized mode: {:?}", mode); },
     }
@@ -58,11 +59,7 @@ fn pagerank_modified<G: EdgeMapper>(graph: &G, nodes: u32, alpha: f32) {
 	println!("Median {:?}", median(&mut measurements));
 }
 
-fn median(numbers: &mut [std::time::Duration]) -> std::time::Duration {
-    numbers.sort();
-    let mid = numbers.len() / 2;
-    numbers[mid]
-}
+
 fn pagerank<G: EdgeMapper>(graph: &G, nodes: u32, alpha: f32) {
 
     let timer = std::time::Instant::now();
