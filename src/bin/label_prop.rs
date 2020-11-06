@@ -32,8 +32,8 @@ fn main() {
 }
 fn label_propagation_modified<G: EdgeMapper>(graph: &G, nodes: u32) {
 	let mut timer = std::time::Instant::now();
-	let mut measurements: [std::time::Duration; 5] = [timer.elapsed(); 5];
-	for _iteration in 0 .. 5 {
+	let mut measurements: [std::time::Duration; 10] = [timer.elapsed(); 10];
+	for _iteration in 0 .. 10 {
 		let mut label: Vec<u32> = (0..nodes).collect();
 		let mut old_sum: u64 = label.iter().fold(0, |t,x| t + *x as u64) + 1;
 		let mut new_sum: u64 = label.iter().fold(0, |t,x| t + *x as u64);
